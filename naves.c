@@ -320,6 +320,16 @@ int main(){
         int revAli = revisar_ganadores(&naves,1);
         int revEne = revisar_ganadores(&naves,2);
 
+        if(revAli == 2){
+            printf("%s\n","Ambos equipos se quedaron sin naves");
+            return 0;
+        }
+        if(revAli == 1){
+            printf("%s\n","Los aliados se quedaron sin naves, los enemigos ganan.");
+        }
+        if(revEne == 1){
+            printf("%s\n","Los enemigos se quedaron sin naves, los aliados ganan.");
+        }
     
     return 0;
     }
