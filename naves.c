@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <time.h> //Para una semilla aleatoria
+#include <time.h> //Para una semilla aleatoria del random
 
 
 //Crea un nodo 
@@ -9,6 +9,7 @@ struct nodo{
     int valor;
     int vida;
     int ataque;
+    int equipo;
     struct nodo* sigt;
     struct nodo* ant;
 
@@ -25,12 +26,13 @@ E: el valor que va a tener el nodo
 S: un nodo
 R: debe dársele un valor
 */
-struct nodo* crear_nodo(int valor, int vida, int ataque){
+struct nodo* crear_nodo(int valor, int vida, int ataque, int equipo){
     struct nodo* n_nodo = calloc(1,sizeof(struct nodo));
     if(n_nodo != NULL) {
         n_nodo->valor = valor;
         n_nodo->vida = vida;
         n_nodo->ataque = ataque;
+        n_nodo->equipo = equipo;
         n_nodo->sigt = NULL; //Se inicializan los valores
         n_nodo->ant = NULL; 
     }
@@ -48,8 +50,8 @@ int imprimir_lista(struct lista* lista){
     struct nodo* actual = lista -> inicio;
 
     while(actual != NULL){
-        printf("%s%d%s%d%s%d\n","Nave: ",actual -> valor," Vida: ",
-            actual->vida," Ataque: ",actual->ataque);
+        printf("%s%d%s%d%s%d%s%d\n","Nave: ",actual -> valor," Vida: ",
+            actual->vida," Ataque: ",actual->ataque," Equipo: ",actual->equipo);
 
         actual = actual -> sigt;
     }
@@ -62,8 +64,8 @@ E: la dirección de la lista y el valor a insertar
 S: lista con el elemento nuevo al final
 R: deben darse los parámetros que son
 */
-int insertar_final(struct lista* lista, int valor, int vida, int ataque){
-    struct nodo* n_nodo = crear_nodo(valor,vida,ataque);
+int insertar_final(struct lista* lista, int valor, int vida, int ataque,int equipo){
+    struct nodo* n_nodo = crear_nodo(valor,vida,ataque,equipo);
     struct nodo* actual = lista->inicio;
 
     if(lista->inicio == NULL){
@@ -85,8 +87,8 @@ E: la dirección de la lista y el valor a insertar
 S: lista con el elemento nuevo al inicio
 R: deben darse los parámetros que son
 */
-int insertar_inicio(struct lista* lista, int valor, int vida, int ataque){
-    struct nodo* n_nodo = crear_nodo(valor,vida,ataque);
+int insertar_inicio(struct lista* lista, int valor, int vida, int ataque, int equipo){
+    struct nodo* n_nodo = crear_nodo(valor,vida,ataque,equipo);
     struct nodo* actual = lista->inicio;
 
     
@@ -108,8 +110,8 @@ E: la dirección de la lista y el valor a insertar
 S: lista con el elemento nuevo en la posición que va
 R: deben darse los parámetros que son
 */
-int insertar_ordenado(struct lista* lista, int valor, int vida, int ataque){
-    struct nodo* n_nodo = crear_nodo(valor,vida,ataque);
+int insertar_ordenado(struct lista* lista, int valor, int vida, int ataque, int equipo){
+    struct nodo* n_nodo = crear_nodo(valor,vida,ataque,equipo);
 
 
     //si la lista está vacía o el valor del nuevo es menor o igual al primero
@@ -153,7 +155,7 @@ E: la lista y el elemento
 S: la lista sin el elemento
 R: deben ser lista y elemento
 */
-int eliminar_elemento(struct lista* lista, int valor){
+int eliminar_elemento(struct lista* lista, int vida){
 
     //Error si no hay elementos
     if(lista->inicio == NULL){
@@ -162,17 +164,18 @@ int eliminar_elemento(struct lista* lista, int valor){
 
     struct nodo* actual = lista->inicio;
 
-    while(actual != NULL && actual->valor != valor){
+    while(actual != NULL && actual->vida > vida){
         actual = actual->sigt;
     }
 
     //si llega al final  y no encuentra el valor
     if(actual == NULL){
-        return 1; 
+        return 0; 
     }
 
     //si no hay anterior es que es el primero, entonces
     //elimina y cambia punteros
+    printf("%s%d\n","Se eliminó la nave ",actual->valor);
     if(actual->ant != NULL){
         actual->ant->sigt = actual->sigt;
     } else {
@@ -192,19 +195,132 @@ int eliminar_elemento(struct lista* lista, int valor){
 
 }
 
+
+int atacar_nave(struct lista* lista, int valor){
+
+    //Error si no hay elementos
+    if(lista->inicio == NULL){
+        return 1;
+    }
+
+    struct nodo* actual = lista->inicio;
+
+    while(actual != NULL && actual->valor != valor){
+        actual = actual->sigt;
+    }
+
+    //si llega al final  y no encuentra el valor
+    if(actual == NULL){
+        return 2; 
+    }
+
+
+    if(actual->valor == valor){
+        //Error si es enemigo
+        if(actual->equipo == 2){
+            return 3;
+        }
+        //Si es el primero
+        if(actual->ant == NULL){
+            actual->sigt->vida = actual->sigt->vida - actual->ataque;
+            return 0;
+        }
+
+        //Si es el último
+        if(actual->sigt == NULL){
+            actual->ant->vida = actual->ant->vida - actual->ataque;
+            return 0;
+        }
+        // si está en cualquier otro lado, ataca al anterior y al siguiente
+        actual->ant->vida = actual->ant->vida - actual->ataque;
+        actual->sigt->vida = actual->sigt->vida - actual->ataque;
+    }
+    
+    return 0;
+
+}
+
+int revisar_ganadores(struct lista* lista, int equipo){
+
+    //Los dos perdieron
+    if(lista->inicio == NULL){
+        return 2;
+    }
+
+    struct nodo* actual = lista->inicio;
+
+    while(actual != NULL && actual->equipo != equipo){
+        actual = actual->sigt;
+    }
+
+    
+    //si llega al final  y no encuentra el valor
+    if(actual == NULL){
+        //No encontró naves del equipo
+        return 1; 
+    }
+    
+    return 0;
+
+}
+
 int main(){
 
     srand(time(NULL));
     struct lista naves;
-    //Genera un número entre 4 y 7 para las naves
+    //Genera un número entre 4 y 7 para el número de naves
     int aleatorio = (rand() % 3)+5;
     
+    //Crea la lista de naves
     for(int i = 1;i<aleatorio+1;i++){
         //Vida y ataque aleatorios a cada nave entre 5 y 9
         int aleatorioV = (rand() % 6)+4;
-        int aleatorioA = (rand() % 6)+4;
-        insertar_final(&naves,i,aleatorioV,aleatorioA);
+        //El ataque es menor porque sino se mueren de un solo y no tiene gracia
+        int aleatorioA = (rand() % 2)+2;
+
+        //Equipo 1 o 2, 1 es amigos y 2 es enemigos
+        int equipo = (rand()%2)+1;
+        insertar_final(&naves,i,aleatorioV,aleatorioA,equipo);
+
     }
     imprimir_lista(&naves);
+    int juego = 1;
+    int turno = 1;
+    while(juego == 1){
+        //Turno del jugador
+        while(turno == 1){
+            int numNave = 0;
+            printf("Escoja un número de nave para que ataque: ");
+            scanf("%d", &numNave);
+
+            //Revisa si se pudo atacar o no
+            int estadoAtaque = atacar_nave(&naves,numNave);
+            if(estadoAtaque == 3){
+                printf("%s\n","La nave escogida es de los enemigos."); 
+                while (getchar() != '\n');
+                
+            } else if(estadoAtaque == 2){
+                printf("%s\n","La nave escogida no existe.");
+                while (getchar() != '\n');
+                }
+            
+            else{
+                printf("%s%d%s\n","La nave ",numNave," atacó a las naves de la par.");
+                imprimir_lista(&naves);
+                break;
+            }
+
+        }
+        //Se revisa 2 veces porque un disparo podría matar 2 naves
+        for(int i = 0;i != 2;i++){
+            eliminar_elemento(&naves,0);
+        }
+
+        //Se revisa si hay ganadores
+        int revAli = revisar_ganadores(&naves,1);
+        int revEne = revisar_ganadores(&naves,2);
+
+    
     return 0;
+    }
 }
