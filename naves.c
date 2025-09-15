@@ -308,15 +308,63 @@ int revisar_ganadores(struct lista* lista, int equipo){
 
 }
 
+
+void turno_jugador(struct lista* naves){
+            int numNave = 0;
+            printf("Escoja un número de nave para que ataque: \n");
+            scanf("%d", &numNave);
+
+            while(1){
+            //Revisa si se pudo atacar o no
+                int estadoAtaque = atacar_nave(naves,numNave);
+                if(estadoAtaque == 3){
+                    printf("%s\n","La nave escogida es de los enemigos."); 
+                    while (getchar() != '\n');
+                    
+                } else if(estadoAtaque == 2){
+                    printf("%s\n","La nave escogida no existe.");
+                    while (getchar() != '\n');
+                    }
+                
+                else{
+                    printf("%s%d%s\n","La nave ",numNave," atacó a las naves de la par.");
+                    break;
+                }
+        }
+
+}
+
+
+
+
+void turno_cpu(struct lista* naves,int num_naves){
+    int numNaveCPU = 0;
+    while(1){    
+        numNaveCPU = (rand()%num_naves)+1;
+
+        //Revisa si se pudo atacar o no
+        int estadoAtaqueCPU = atacar_nave_CPU(naves,numNaveCPU);
+        
+        if(estadoAtaqueCPU != 2 && estadoAtaqueCPU != 3){
+            printf("%s%d%s\n","La nave ",numNaveCPU," atacó a las naves de la par.");
+            break;
+        }else{
+            continue;
+        }
+    }
+}
+
+
+
 int main(){
 
     srand(time(NULL));
-    struct lista naves;
+    struct lista naves = {NULL,NULL};
     //Genera un número entre 4 y 7 para el número de naves
-    int aleatorio = (rand() % 3)+5;
+    int num_naves = (rand() % 3)+5;
     
     //Crea la lista de naves
-    for(int i = 1;i<aleatorio+1;i++){
+    for(int i = 1;i<num_naves+1;i++){
         //Vida y ataque aleatorios a cada nave entre 5 y 9
         int aleatorioV = (rand() % 6)+4;
         //El ataque es menor porque sino se mueren de un solo y no tiene gracia
@@ -328,32 +376,10 @@ int main(){
 
     }
     imprimir_lista(&naves);
-    int juego = 1;
-    int turno = 1;
-    while(juego == 1){
+
+    while(1){
         //Turno del jugador
-        while(turno == 1){
-            int numNave = 0;
-            printf("Escoja un número de nave para que ataque: \n");
-            scanf("%d", &numNave);
-
-            //Revisa si se pudo atacar o no
-            int estadoAtaque = atacar_nave(&naves,numNave);
-            if(estadoAtaque == 3){
-                printf("%s\n","La nave escogida es de los enemigos."); 
-                while (getchar() != '\n');
-                
-            } else if(estadoAtaque == 2){
-                printf("%s\n","La nave escogida no existe.");
-                while (getchar() != '\n');
-                }
-            
-            else{
-                printf("%s%d%s\n","La nave ",numNave," atacó a las naves de la par.");
-                break;
-            }
-
-        }
+        turno_jugador(&naves);
         //Se revisa 2 veces porque un disparo podría matar 2 naves
         for(int i = 0;i != 2;i++){
             eliminar_elemento(&naves,0);
@@ -365,39 +391,22 @@ int main(){
         int revEne = revisar_ganadores(&naves,2);
 
         if(revAli == 2){
-            printf("%s\n","Ambos equipos se quedar3on sin naves");
-            juego = 0;
+            printf("%s\n","Ambos equipos se quedaron sin naves\n");
+            break;
         }
         if(revAli == 1){
-            printf("%s\n","Los aliados se quedaron sin naves, los enemigos ganan.");
-            juego = 0;
+            printf("%s\n","Los aliados se quedaron sin naves, los enemigos ganan.\n");
+            break;
         }
         if(revEne == 1){
-            printf("%s\n","Los enemigos se quedaron sin naves, los aliados ganan.");
-            juego = 0;
-        }
-        printf("\n");
-        turno = 2;
+            printf("%s\n","Los enemigos se quedaron sin naves, los aliados ganan.\n");
+            break;
+        }        
+
+        //Turno de CPU        
         
-
-        //Turno enemigoAAA
+        turno_cpu(&naves,num_naves);
         
-        while(turno == 2){
-            int numNaveCPU = 0;
-            
-            numNaveCPU = (rand()%aleatorio)+1;
-
-            //Revisa si se pudo atacar o no
-            int estadoAtaqueCPU = atacar_nave_CPU(&naves,numNaveCPU);
-            
-            if(estadoAtaqueCPU != 2 && estadoAtaqueCPU != 3){
-                printf("%s%d%s\n","La nave ",numNaveCPU," atacó a las naves de la par.");
-                break;
-            }else{
-                continue;
-            }
-
-        }
         //Se revisa 2 veces porque un disparo podría matar 2 naves
         for(int i = 0;i != 2;i++){
             eliminar_elemento(&naves,0);
@@ -405,25 +414,25 @@ int main(){
         imprimir_lista(&naves);
 
         //Se revisa si hay ganadores
-        revAli = revisar_ganadores(&naves,1);
-        revEne = revisar_ganadores(&naves,2);
+        int revAli2 = revisar_ganadores(&naves,1);
+        int revEne2 = revisar_ganadores(&naves,2);
 
-        if(revAli == 2){
+        if(revAli2 == 2){
             printf("%s\n","Ambos equipos se quedaron sin naves");
-            juego = 0;
+            break;
         }
-        if(revAli == 1){
+        if(revAli2 == 1){
             printf("%s\n","Los aliados se quedaron sin naves, los enemigos ganan.");
-            juego = 0;
+            break;
         }
-        if(revEne == 1){
+        if(revEne2 == 1){
             printf("%s\n","Los enemigos se quedaron sin naves, los aliados ganan.");
-            juego = 0;
+            break;
 
         }
-        turno = 1;
         
     }
-
     return 0;
 }
+
+    
