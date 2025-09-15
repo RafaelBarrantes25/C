@@ -38,23 +38,31 @@ struct nodo* crear_nodo(int valor, int vida, int ataque, int equipo){
     }
     return n_nodo;
 };
+
+
+
 /*
 Imprime la lista
 E: puntero de la lista
 S: lista impresa
 R: debe dársele el puntero
 */
-//MODIFICAR PARA VIDA Y ATAQUE
 int imprimir_lista(struct lista* lista){
 
     struct nodo* actual = lista -> inicio;
 
     while(actual != NULL){
-        printf("%s%d%s%d%s%d%s%d\n","Nave: ",actual -> valor," Vida: ",
-            actual->vida," Ataque: ",actual->ataque," Equipo: ",actual->equipo);
+        printf("%s%d%s%d%s%d%s","Nave: ",actual -> valor," Vida: ",
+            actual->vida," Ataque: ",actual->ataque," Equipo: ");
+            if(actual->equipo == 1){
+                printf("Aliado\n");
+            }else{
+                printf("Enemigo\n");
+            }
 
         actual = actual -> sigt;
     }
+    printf("");
     return 0;
 }
 
